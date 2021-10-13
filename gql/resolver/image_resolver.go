@@ -17,6 +17,18 @@ func (r *mutationResolver) DeleteImage(ctx context.Context, name string) (*model
 	return r.imageSvc.Delete(ctx, name)
 }
 
+func (r *mutationResolver) DeleteImages(ctx context.Context, names []string) ([]*model.ImageInfo, error) {
+	images := make([]*model.ImageInfo, len(names))
+	for idx, name := range names {
+		var err error
+		images[idx], err = r.DeleteImage(ctx, name)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return images, nil
+}
+
 func (r *mutationResolver) DeletedImage(ctx context.Context, name string, node string) (*model.ImageInfo, error) {
 	return r.imageSvc.DeletedFromNode(ctx, name, node)
 }

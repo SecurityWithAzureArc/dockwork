@@ -17,3 +17,7 @@ resolver:
   layout: follow-schema
   dir: resolver
   filename_template: "{name}_resolver.go"
+
+models:
+  ID:
+    model: github.com/securitywithazurearc/dockwork/gql/model.ObjectID

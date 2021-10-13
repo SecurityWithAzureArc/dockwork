@@ -7,6 +7,9 @@ import (
 	"os"
 
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-nm/sig"
 	"github.com/securitywithazurearc/dockwork/gql"
 	"github.com/securitywithazurearc/dockwork/pkg/config"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -21,11 +24,26 @@ func runAPI() (err error) {
 		return
 	}
 
-	http.Handle("/graphql", gql.Handler(mongoClient.Database(cfg.DatabaseName)))
-	http.Handle("/", playground.Handler("Dock Work", "/graphql"))
+	router := chi.NewRouter()
 
-	// TODO: listen to os signal for shutdown
-	return http.ListenAndServe(cfg.Addr, nil)
+	router.Use(
+		middleware.RequestID,
+		middleware.RealIP,
+		middleware.Logger,
+		middleware.Recoverer,
+		// TODO: set more reasonable defaults & allow configuration of CORS headers
+		middleware.SetHeader("Access-Control-Allow-Origin", "*"),
+		middleware.SetHeader("Access-Control-Allow-Methods", "*"),
+		middleware.SetHeader("Access-Control-Allow-Headers", "*"),
+	)
+
+	router.Handle("/graphql", gql.Handler(mongoClient.Database(cfg.DatabaseName)))
+	router.Handle("/", playground.Handler("Dock Work", "/graphql"))
+
+	server := http.Server{Addr: cfg.Addr, Handler: router}
+	return sig.StopSignalE(server.ListenAndServe, func() error {
+		return server.Shutdown(context.TODO())
+	})
 }
 
 func main() {

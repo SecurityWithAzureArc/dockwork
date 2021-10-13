@@ -92,6 +92,7 @@ func (s *Image) Delete(ctx context.Context, name string) (image *model.ImageInfo
 }
 
 func (s *Image) DeleteListen(ctx context.Context, node *string) (<-chan *model.ImageInfo, error) {
+	// TODO: this may be better off as a singleton for the running app instance instead of per connection
 	docQuery := bson.M{"fullDocument.shouldDelete": true}
 	if node != nil {
 		docQuery["fullDocument.nodes"] = *node
