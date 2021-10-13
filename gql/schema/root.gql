@@ -1,0 +1,16 @@
+scalar Time
+scalar Map
+scalar Upload
+scalar Any
+
+type Query {
+  root: String!
+}
+
+type Mutation {
+  rootMessage(name: String!): String!
+}
+
+type Subscription {
+  rootNotification: String!
+}

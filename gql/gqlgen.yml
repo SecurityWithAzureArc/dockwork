@@ -1,0 +1,19 @@
+schema:
+  - schema/*.gql
+
+exec:
+  filename: server/server.go
+
+federation:
+  filename: server/federation.go
+
+model:
+  filename: model/generated.go
+
+autobind:
+  - github.com/securitywithazurearc/dockwork/gql/model
+
+resolver:
+  layout: follow-schema
+  dir: resolver
+  filename_template: "{name}_resolver.go"

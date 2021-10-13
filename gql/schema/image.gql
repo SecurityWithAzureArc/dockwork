@@ -1,0 +1,25 @@
+type ImageInfo {
+    name: String!
+    nodes: [String!]
+    shouldDelete: Boolean!
+}
+
+input ImageInput {
+    name: String!
+    node: String!
+}
+
+extend type Query {
+    images(last: Int, skip: Int): [ImageInfo!]
+    image(name: String!): ImageInfo!
+}
+
+extend type Mutation {
+    addImage(image: ImageInput!): ImageInfo!
+    deleteImage(name: String!): ImageInfo!
+    deletedImage(name: String!, node: String!): ImageInfo!
+}
+
+extend type Subscription {
+    deleteImageNotification(node: String): ImageInfo!
+}

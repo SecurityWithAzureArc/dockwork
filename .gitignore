@@ -1,0 +1,6 @@
+gql/server
+gql/model/generated.go
+
+tmp/
+/dockwork
+/dockwork.exe
