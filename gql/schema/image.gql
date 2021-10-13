@@ -2,7 +2,10 @@ type ImageInfo {
     id: ID!
     name: String!
     nodes: [String!]
-    shouldDelete: Boolean!
+
+    createdAt: Time!
+    updatedAt: Time!
+    deletedAt: Time
 }
 
 input ImageInput {

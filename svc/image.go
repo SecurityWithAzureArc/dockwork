@@ -3,6 +3,7 @@ package svc
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/securitywithazurearc/dockwork/gql/model"
 	"go.mongodb.org/mongo-driver/bson"
@@ -39,7 +40,11 @@ func (s *Image) Set(ctx context.Context, name, node string) (image *model.ImageI
 		SetReturnDocument(options.After)
 
 	query := bson.M{"name": name}
-	update := bson.M{"$addToSet": bson.M{"nodes": node}}
+	update := bson.M{
+		"$addToSet":    bson.M{"nodes": node},
+		"$setOnInsert": bson.M{"createdAt": time.Now()},
+		"$set":         bson.M{"updatedAt": time.Now()},
+	}
 	res := s.mongo.FindOneAndUpdate(ctx, query, update, opts)
 	err = res.Err()
 	if err != nil {
@@ -79,7 +84,7 @@ func (s *Image) DeletedFromNode(ctx context.Context, name, node string) (image *
 
 func (s *Image) Delete(ctx context.Context, name string) (image *model.ImageInfo, err error) {
 	query := bson.M{"name": name}
-	update := bson.M{"$set": bson.M{"shouldDelete": true}}
+	update := bson.M{"$set": bson.M{"deletedAt": time.Now()}}
 	res := s.mongo.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(options.After))
 	err = res.Err()
 	if err != nil {
@@ -93,7 +98,7 @@ func (s *Image) Delete(ctx context.Context, name string) (image *model.ImageInfo
 
 func (s *Image) DeleteListen(ctx context.Context, node *string) (<-chan *model.ImageInfo, error) {
 	// TODO: this may be better off as a singleton for the running app instance instead of per connection
-	docQuery := bson.M{"fullDocument.shouldDelete": true}
+	docQuery := bson.M{"fullDocument.deletedAt": bson.M{"$exists": true}}
 	if node != nil {
 		docQuery["fullDocument.nodes"] = *node
 	}
