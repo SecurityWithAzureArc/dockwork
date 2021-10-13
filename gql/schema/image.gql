@@ -1,16 +1,26 @@
 type ImageInfo {
     id: ID!
     name: String!
-    nodes: [String!]
+    nodes: [ImageInfoNode!]
 
     createdAt: Time!
     updatedAt: Time!
     deletedAt: Time
 }
 
+type ImageInfoNode {
+    name: String!
+    namespace: String!
+}
+
 input ImageInput {
     name: String!
-    node: String!
+    node: ImageNodeInput!
+}
+
+input ImageNodeInput {
+    name: String!
+    namespace: String!
 }
 
 extend type Query {
@@ -22,7 +32,7 @@ extend type Mutation {
     addImage(image: ImageInput!): ImageInfo!
     deleteImage(name: String!): ImageInfo!
     deleteImages(names: [String!]!): [ImageInfo!]
-    deletedImage(name: String!, node: String!): ImageInfo!
+    deletedNodeImage(imageName: String!, node: ImageNodeInput!): ImageInfo!
 }
 
 extend type Subscription {

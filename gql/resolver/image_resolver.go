@@ -10,7 +10,7 @@ import (
 )
 
 func (r *mutationResolver) AddImage(ctx context.Context, image model.ImageInput) (*model.ImageInfo, error) {
-	return r.imageSvc.Set(ctx, image.Name, image.Node)
+	return r.imageSvc.Set(ctx, image.Name, image.Node.ToImageInfoNode())
 }
 
 func (r *mutationResolver) DeleteImage(ctx context.Context, name string) (*model.ImageInfo, error) {
@@ -29,8 +29,8 @@ func (r *mutationResolver) DeleteImages(ctx context.Context, names []string) ([]
 	return images, nil
 }
 
-func (r *mutationResolver) DeletedImage(ctx context.Context, name string, node string) (*model.ImageInfo, error) {
-	return r.imageSvc.DeletedFromNode(ctx, name, node)
+func (r *mutationResolver) DeletedNodeImage(ctx context.Context, imageName string, node model.ImageNodeInput) (*model.ImageInfo, error) {
+	return r.imageSvc.DeletedFromNode(ctx, imageName, node.ToImageInfoNode())
 }
 
 func (r *queryResolver) Images(ctx context.Context, last *int, skip *int) ([]*model.ImageInfo, error) {

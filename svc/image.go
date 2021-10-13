@@ -34,7 +34,7 @@ func (s *Image) List(ctx context.Context, skip, last int) (images []*model.Image
 	return
 }
 
-func (s *Image) Set(ctx context.Context, name, node string) (image *model.ImageInfo, err error) {
+func (s *Image) Set(ctx context.Context, name string, node model.ImageInfoNode) (image *model.ImageInfo, err error) {
 	opts := options.FindOneAndUpdate().
 		SetUpsert(true).
 		SetReturnDocument(options.After)
@@ -68,7 +68,7 @@ func (s *Image) Get(ctx context.Context, name string) (image *model.ImageInfo, e
 	return
 }
 
-func (s *Image) DeletedFromNode(ctx context.Context, name, node string) (image *model.ImageInfo, err error) {
+func (s *Image) DeletedFromNode(ctx context.Context, name string, node model.ImageInfoNode) (image *model.ImageInfo, err error) {
 	query := bson.M{"name": name}
 	update := bson.M{"$pull": bson.M{"nodes": node}}
 	res := s.mongo.FindOneAndUpdate(ctx, query, update)
@@ -100,7 +100,7 @@ func (s *Image) DeleteListen(ctx context.Context, node *string) (<-chan *model.I
 	// TODO: this may be better off as a singleton for the running app instance instead of per connection
 	docQuery := bson.M{"fullDocument.deletedAt": bson.M{"$exists": true}}
 	if node != nil {
-		docQuery["fullDocument.nodes"] = *node
+		docQuery["fullDocument.nodes.name"] = *node
 	}
 
 	query := bson.A{
