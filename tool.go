@@ -6,5 +6,4 @@ package tool
 import (
 	// Gqlgen CLI used for Go generate
 	_ "github.com/99designs/gqlgen"
-	_ "github.com/cosmtrek/air"
 )

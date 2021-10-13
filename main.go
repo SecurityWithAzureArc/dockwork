@@ -22,7 +22,7 @@ func runAPI() (err error) {
 	}
 
 	http.Handle("/graphql", gql.Handler(mongoClient.Database(cfg.DatabaseName)))
-	http.Handle("/", playground.Handler("IRaaS", "/graphql"))
+	http.Handle("/", playground.Handler("Dock Work", "/graphql"))
 
 	// TODO: listen to os signal for shutdown
 	return http.ListenAndServe(cfg.Addr, nil)

@@ -40,7 +40,7 @@ func Load() {
 	port := envInt("PORT", 5000)
 
 	dbURL := envStr("DATABASE_NAME", "mongodb://localhost")
-	dbName := "iraas"
+	dbName := "dockwork"
 	if dbConn, err := connstring.ParseAndValidate(dbURL); err == nil && dbConn.Database != "" {
 		dbName = dbConn.Database
 	}
