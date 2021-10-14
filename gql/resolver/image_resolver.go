@@ -14,15 +14,7 @@ func (r *mutationResolver) AddImage(ctx context.Context, image model.ImageInput)
 }
 
 func (r *mutationResolver) AddImages(ctx context.Context, images []*model.ImageInput) ([]*model.ImageInfo, error) {
-	addedImages := make([]*model.ImageInfo, len(images))
-	for idx, image := range images {
-		var err error
-		addedImages[idx], err = r.AddImage(ctx, *image)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return addedImages, nil
+	return r.imageSvc.SetMany(ctx, images)
 }
 
 func (r *mutationResolver) DeleteImage(ctx context.Context, name string) (*model.ImageInfo, error) {
@@ -30,15 +22,7 @@ func (r *mutationResolver) DeleteImage(ctx context.Context, name string) (*model
 }
 
 func (r *mutationResolver) DeleteImages(ctx context.Context, names []string) ([]*model.ImageInfo, error) {
-	images := make([]*model.ImageInfo, len(names))
-	for idx, name := range names {
-		var err error
-		images[idx], err = r.DeleteImage(ctx, name)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return images, nil
+	return r.imageSvc.DeleteMany(ctx, names)
 }
 
 func (r *mutationResolver) DeletedNodeImage(ctx context.Context, imageName string, node model.ImageNodeInput) (*model.ImageInfo, error) {

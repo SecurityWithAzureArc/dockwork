@@ -48,12 +48,7 @@ func (s *Image) Set(ctx context.Context, name string, node model.ImageInfoNode) 
 		SetUpsert(true).
 		SetReturnDocument(options.After)
 
-	query := bson.M{"name": name}
-	update := bson.M{
-		"$addToSet":    bson.M{"nodes": node},
-		"$setOnInsert": bson.M{"createdAt": time.Now()},
-		"$set":         bson.M{"updatedAt": time.Now()},
-	}
+	query, update := s.buildSetQuery(name, node)
 	res := s.mongo.FindOneAndUpdate(ctx, query, update, opts)
 	err = res.Err()
 	if err != nil {
@@ -62,6 +57,39 @@ func (s *Image) Set(ctx context.Context, name string, node model.ImageInfoNode) 
 
 	image = &model.ImageInfo{}
 	err = res.Decode(image)
+	return
+}
+
+func (s *Image) SetMany(ctx context.Context, imageInputs []*model.ImageInput) (images []*model.ImageInfo, err error) {
+	writes := make([]mongo.WriteModel, len(imageInputs))
+	names := make([]string, len(imageInputs))
+	for idx, image := range imageInputs {
+		updateModel := mongo.NewUpdateOneModel()
+		filter, update := s.buildSetQuery(image.Name, image.Node.ToImageInfoNode())
+
+		updateModel.SetFilter(filter)
+		updateModel.SetUpdate(update)
+		updateModel.SetUpsert(true)
+
+		writes[idx] = updateModel
+		names[idx] = image.Name
+	}
+
+	_, err = s.mongo.BulkWrite(ctx, writes)
+	if err != nil {
+		return
+	}
+
+	return s.GetMany(ctx, names)
+}
+
+func (s *Image) buildSetQuery(name string, node model.ImageInfoNode) (query bson.M, update bson.M) {
+	query = bson.M{"name": name}
+	update = bson.M{
+		"$addToSet":    bson.M{"nodes": node},
+		"$setOnInsert": bson.M{"createdAt": time.Now()},
+		"$set":         bson.M{"updatedAt": time.Now()},
+	}
 	return
 }
 
@@ -74,6 +102,16 @@ func (s *Image) Get(ctx context.Context, name string) (image *model.ImageInfo, e
 
 	image = &model.ImageInfo{}
 	err = res.Decode(image)
+	return
+}
+
+func (s *Image) GetMany(ctx context.Context, names []string) (images []*model.ImageInfo, err error) {
+	res, err := s.mongo.Find(ctx, bson.M{"name": bson.M{"$in": names}})
+	if err != nil {
+		return
+	}
+
+	err = res.All(ctx, &images)
 	return
 }
 
@@ -103,6 +141,17 @@ func (s *Image) Delete(ctx context.Context, name string) (image *model.ImageInfo
 	image = &model.ImageInfo{}
 	res.Decode(image)
 	return
+}
+
+func (s *Image) DeleteMany(ctx context.Context, names []string) (images []*model.ImageInfo, err error) {
+	query := bson.M{"name": bson.M{"$in": names}}
+	update := bson.M{"$set": bson.M{"deletedAt": time.Now()}}
+	_, err = s.mongo.UpdateMany(ctx, query, update)
+	if err != nil {
+		return
+	}
+
+	return s.GetMany(ctx, names)
 }
 
 func (s *Image) DeleteListen(ctx context.Context, node *string) (<-chan *model.ImageInfo, error) {
