@@ -15,6 +15,8 @@ type Settings struct {
 
 	DatabaseURL  string
 	DatabaseName string
+
+	GraphQLPlayEnabled bool
 }
 
 var currentSettings *Settings
@@ -35,11 +37,19 @@ func envInt(key string, defaultValue int) int {
 	return defaultValue
 }
 
+func envBool(key string, defaultValue bool) bool {
+	if val, err := strconv.ParseBool(os.Getenv(key)); err == nil {
+		return val
+	}
+
+	return defaultValue
+}
+
 func Load() {
 	host := envStr("ADDRESS", "")
 	port := envInt("PORT", 5000)
 
-	dbURL := envStr("DATABASE_NAME", "mongodb://localhost")
+	dbURL := envStr("DATABASE_URL", "mongodb://localhost")
 	dbName := "dockwork"
 	if dbConn, err := connstring.ParseAndValidate(dbURL); err == nil && dbConn.Database != "" {
 		dbName = dbConn.Database
@@ -50,8 +60,10 @@ func Load() {
 		Port: port,
 		Addr: fmt.Sprintf("%s:%d", host, port),
 
-		DatabaseURL:  envStr("DATABASE_URL", dbURL),
+		DatabaseURL:  dbURL,
 		DatabaseName: envStr("DATABASE_NAME", dbName),
+
+		GraphQLPlayEnabled: envBool("GRAPHQL_PLAY_ENABLED", true),
 	}
 }
 

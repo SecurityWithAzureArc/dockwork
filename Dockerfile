@@ -19,7 +19,7 @@ RUN go mod download
 
 # Build App
 COPY . .
-RUN go generate ./...
+RUN CGO_ENABLED=0 go generate ./...
 RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /out/app .
 
 # Compress App

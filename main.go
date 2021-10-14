@@ -38,7 +38,9 @@ func runAPI() (err error) {
 	)
 
 	router.Handle("/graphql", gql.Handler(mongoClient.Database(cfg.DatabaseName)))
-	router.Handle("/", playground.Handler("Dock Work", "/graphql"))
+	if cfg.GraphQLPlayEnabled {
+		router.Handle("/", playground.Handler("Dock Work", "/graphql"))
+	}
 
 	server := http.Server{Addr: cfg.Addr, Handler: router}
 	return sig.StopSignalE(server.ListenAndServe, func() error {
