@@ -31,10 +31,6 @@ func runAPI() (err error) {
 		middleware.RealIP,
 		middleware.Logger,
 		middleware.Recoverer,
-		// TODO: set more reasonable defaults & allow configuration of CORS headers
-		middleware.SetHeader("Access-Control-Allow-Origin", "*"),
-		middleware.SetHeader("Access-Control-Allow-Methods", "*"),
-		middleware.SetHeader("Access-Control-Allow-Headers", "*"),
 	)
 
 	router.Handle("/graphql", gql.Handler(mongoClient.Database(cfg.DatabaseName)))
