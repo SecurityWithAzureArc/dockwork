@@ -24,14 +24,24 @@ input ImageNodeInput {
 }
 
 extend type Query {
-    images(last: Int, skip: Int): [ImageInfo!]
+    images(last: Int, skip: Int, node: ImageNodeInput, deleted: Boolean): [ImageInfo!]
     image(name: String!): ImageInfo!
 }
 
 extend type Mutation {
+    # Register an image with the node
     addImage(image: ImageInput!): ImageInfo!
+
+    # Register multiple images with the node
+    addImages(images: [ImageInput!]): [ImageInfo!]
+
+    # Delete a single image from 
     deleteImage(name: String!): ImageInfo!
+
+    # Mark multiple images as being ready for deletion
     deleteImages(names: [String!]!): [ImageInfo!]
+
+    # Used when a node has deleted an image (to register that the node no longer has that image locally)
     deletedNodeImage(imageName: String!, node: ImageNodeInput!): ImageInfo!
 }
 

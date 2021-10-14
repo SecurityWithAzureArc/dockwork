@@ -23,8 +23,17 @@ func NewImage(mongoDB *mongo.Database) *Image {
 	}
 }
 
-func (s *Image) List(ctx context.Context, skip, last int) (images []*model.ImageInfo, err error) {
-	res, err := s.mongo.Find(ctx, bson.M{}, options.Find().SetLimit(int64(last)).SetSkip(int64(skip)))
+func (s *Image) List(ctx context.Context, skip, last int, node *model.ImageInfoNode, deleted *bool) (images []*model.ImageInfo, err error) {
+	query := bson.M{}
+	if node != nil {
+		query["nodes"] = node
+	}
+
+	if deleted != nil {
+		query["deletedAt"] = bson.M{"$exists": *deleted}
+	}
+
+	res, err := s.mongo.Find(ctx, query, options.Find().SetLimit(int64(last)).SetSkip(int64(skip)))
 	if err != nil {
 		return
 	}

@@ -13,6 +13,18 @@ func (r *mutationResolver) AddImage(ctx context.Context, image model.ImageInput)
 	return r.imageSvc.Set(ctx, image.Name, image.Node.ToImageInfoNode())
 }
 
+func (r *mutationResolver) AddImages(ctx context.Context, images []*model.ImageInput) ([]*model.ImageInfo, error) {
+	addedImages := make([]*model.ImageInfo, len(images))
+	for idx, image := range images {
+		var err error
+		addedImages[idx], err = r.AddImage(ctx, *image)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return addedImages, nil
+}
+
 func (r *mutationResolver) DeleteImage(ctx context.Context, name string) (*model.ImageInfo, error) {
 	return r.imageSvc.Delete(ctx, name)
 }
@@ -33,7 +45,7 @@ func (r *mutationResolver) DeletedNodeImage(ctx context.Context, imageName strin
 	return r.imageSvc.DeletedFromNode(ctx, imageName, node.ToImageInfoNode())
 }
 
-func (r *queryResolver) Images(ctx context.Context, last *int, skip *int) ([]*model.ImageInfo, error) {
+func (r *queryResolver) Images(ctx context.Context, last *int, skip *int, node *model.ImageNodeInput, deleted *bool) ([]*model.ImageInfo, error) {
 	lastNum := 48
 	if last != nil {
 		lastNum = *last
@@ -47,7 +59,13 @@ func (r *queryResolver) Images(ctx context.Context, last *int, skip *int) ([]*mo
 		skipNum = *skip
 	}
 
-	return r.imageSvc.List(ctx, skipNum, lastNum)
+	var nodeInfo *model.ImageInfoNode
+	if node != nil {
+		n := node.ToImageInfoNode()
+		nodeInfo = &n
+	}
+
+	return r.imageSvc.List(ctx, skipNum, lastNum, nodeInfo, deleted)
 }
 
 func (r *queryResolver) Image(ctx context.Context, name string) (*model.ImageInfo, error) {
