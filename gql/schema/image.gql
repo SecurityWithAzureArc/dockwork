@@ -3,6 +3,8 @@ type ImageInfo {
     name: String!
     nodes: [ImageInfoNode!]
 
+    # TODO: Add timestamp for image last seen on node
+
     createdAt: Time!
     updatedAt: Time!
     deletedAt: Time
@@ -43,6 +45,9 @@ extend type Mutation {
 
     # Used when a node has deleted an image (to register that the node no longer has that image locally)
     deletedNodeImage(imageName: String!, node: ImageNodeInput!): ImageInfo!
+
+    # Remove an image completely without notifying nodes. The image will re-appear if it is found on a node again
+    forceDeleteImage(name: String!): Boolean!
 }
 
 extend type Subscription {

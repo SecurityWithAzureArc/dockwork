@@ -29,6 +29,10 @@ func (r *mutationResolver) DeletedNodeImage(ctx context.Context, imageName strin
 	return r.imageSvc.DeletedFromNode(ctx, imageName, node.ToImageInfoNode())
 }
 
+func (r *mutationResolver) ForceDeleteImage(ctx context.Context, name string) (bool, error) {
+	return r.imageSvc.ForceDelete(ctx, name)
+}
+
 func (r *queryResolver) Images(ctx context.Context, last *int, skip *int, node *model.ImageNodeInput, deleted *bool) ([]*model.ImageInfo, error) {
 	lastNum := 48
 	if last != nil {

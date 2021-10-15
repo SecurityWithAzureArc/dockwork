@@ -196,3 +196,13 @@ func (s *Image) DeleteListen(ctx context.Context, node *string) (<-chan *model.I
 
 	return infoChan, nil
 }
+
+func (s *Image) ForceDelete(ctx context.Context, name string) (ok bool, err error) {
+	res, err := s.mongo.DeleteOne(ctx, bson.M{"name": name})
+	if err != nil {
+		return
+	}
+
+	ok = res.DeletedCount == 1
+	return
+}
