@@ -10,6 +10,9 @@ type ImageInfo {
     deletedAt: Time
 }
 
+"""
+The information about the node that contains the image
+"""
 type ImageInfoNode {
     name: String!
     namespace: String!
@@ -26,30 +29,52 @@ input ImageNodeInput {
 }
 
 extend type Query {
+    """
+    List all images
+    """
     images(last: Int, skip: Int, node: ImageNodeInput, deleted: Boolean): [ImageInfo!]
+
+    """
+    Get details of a single image by name
+    """
     image(name: String!): ImageInfo!
 }
 
 extend type Mutation {
-    # Register an image with the node
+    """
+    Register an image with the node
+    """
     addImage(image: ImageInput!): ImageInfo!
 
-    # Register multiple images with the node
+    """
+    Register multiple images with the node
+    """
     addImages(images: [ImageInput!]): [ImageInfo!]
 
-    # Delete a single image from 
+    """
+    Mark a single image as being ready for deletion
+    """
     deleteImage(name: String!): ImageInfo!
 
-    # Mark multiple images as being ready for deletion
+    """
+    Mark multiple images as being ready for deletion
+    """
     deleteImages(names: [String!]!): [ImageInfo!]
 
-    # Used when a node has deleted an image (to register that the node no longer has that image locally)
+    """
+    Used when a node has deleted an image (to register that the node no longer has that image locally)
+    """
     deletedNodeImage(imageName: String!, node: ImageNodeInput!): ImageInfo!
 
-    # Remove an image completely without notifying nodes. The image will re-appear if it is found on a node again
+    """
+    Remove an image completely without notifying nodes. The image will re-appear if it is found on a node again
+    """
     forceDeleteImage(name: String!): Boolean!
 }
 
 extend type Subscription {
+    """
+    Listen for delete notifications (optionally for a given node)
+    """
     deleteImageNotification(node: String): ImageInfo!
 }
